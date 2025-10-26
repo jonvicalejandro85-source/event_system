@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="d-flex justify-content-between">
+    <div>
+      <h2>{{ event.name }}</h2>
+      <p>{{ event.description }}</p>
+      <p><strong>When:</strong> {{ event.start_datetime }} {% if event.end_datetime %} - {{ event.end_datetime }}{% endif %}</p>
+      <p><strong>Where:</strong> {{ event.venue }}</p>
+      <a class="btn btn-secondary" href="{{ url_for('edit_event', event_id=event.id) }}">Edit</a>
+      <a class="btn btn-outline-primary" href="{{ url_for('export_attendees', event_id=event.id) }}">Export attendees</a>
+    </div>
+    <div style="min-width:300px">
+      <h5>Register (RSVP)</h5>
+      <form method="post" action="{{ url_for('register', event_id=event.id) }}">
+        {{ form.hidden_tag() }}
+        <div class="mb-2">{{ form.full_name(class="form-control", placeholder="Full name") }}</div>
+        <div class="mb-2">{{ form.email(class="form-control", placeholder="Email (optional)") }}</div>
+        <button class="btn btn-success">{{ form.submit.label }}</button>
+      </form>
+    </div>
+  </div>
+
+  <hr/>
+  <h4>Attendees ({{ event.attendees|length }})</h4>
+  <ul class="list-group">
+    {% for a in event.attendees %}
+      <li class="list-group-item">
+        <strong>{{ a.full_name }}</strong> — {{ a.email }} — <em>{{ a.rsvp_status }}</em>
+        {% if a.feedback %}<div>Feedback: {{ a.feedback }}</div>{% endif %}
+      </li>
+    {% else %}
+      <li class="list-group-item">No attendees yet.</li>
+    {% endfor %}
+  </ul>
+<br>
+<h4>Send Update to Attendees</h4>
+<form method="post" action="{{ url_for('notify', event_id=event.id) }}">
+  <div class="mb-3">
+    <label>Subject</label>
+    <input type="text" name="subject" class="form-control" placeholder="Email Subject" required>
+  </div>
+  <div class="mb-3">
+    <label>Message</label>
+    <textarea name="message" class="form-control" rows="10" placeholder="Your message..." required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Send Email to All Attendees</button>
+</form>
+
+<hr/>
+
+<!-- Script to auto-fill the message and subject -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const messageBox = document.querySelector('textarea[name="message"]');
+    const subjectBox = document.querySelector('input[name="subject"]');
+    if (messageBox && subjectBox) {
+      const eventName = "{{ event.name }}";
+      const startDate = "{{ event.start_datetime.strftime('%B %d, %Y') }}"; 
+      const startTime = "{{ event.start_datetime.strftime('%I:%M %p') }}";  
+      const venue = "{{ event.venue }}";
+      const rsvpDate = "{{ event.end_datetime.strftime('%B %d, %Y') if event.end_datetime else '[RSVP Date]' }}";
+
+      // Fill the message textarea
+      messageBox.value = 
+      `Dear Attendant,
+    We would like to invite you to attend the ${eventName}. 
+
+    This event will be held on ${startDate} at ${startTime} at ${venue}.
+    Your presence and input are greatly appreciated.
+    Please confirm your attendance by ${rsvpDate}.
+    We look forward to seeing you there.
+
+    Sincerely,
+    ${eventName}`;
+
+      // Fill the subject field
+      subjectBox.value = `${eventName} on ${startDate}`;
+    }
+  });
+</script>
+{% endblock %}

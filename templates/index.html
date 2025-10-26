@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block content %}
+  <h1>Upcoming events</h1>
+  <div class="list-group">
+    {% for ev in events %}
+      <a class="list-group-item list-group-item-action" href="{{ url_for('event_detail', event_id=ev.id) }}">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ ev.name }}</h5>
+          <small>{{ ev.start_datetime.strftime('%Y-%m-%d %H:%M') }}</small>
+        </div>
+        <p class="mb-1">{{ ev.description[:150] }}</p>
+        <small>{{ ev.venue }}</small>
+      </a>
+    {% else %}
+      <div class="p-3">No events yet. <a href="{{ url_for('create_event') }}">Create one</a>.</div>
+    {% endfor %}
+  </div>
+{% endblock %}

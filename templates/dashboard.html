@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+
+<!-- Chart container -->
+<canvas id="chart" width="400" height="200"></canvas>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Get the chart element
+  const ctx = document.getElementById('chart').getContext('2d');
+
+  // Fetch event data from Flask (passed as 'data' in render_template)
+  const eventLabels = {{ data|map(attribute='name')|list|tojson }};
+  const eventTotals = {{ data|map(attribute='total')|list|tojson }};
+  const eventAttended = {{ data|map(attribute='attended')|list|tojson }};
+
+  // Create the bar chart
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: eventLabels,
+      datasets: [
+        {
+          label: 'Registered',
+          data: eventTotals,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Attended',
+          data: eventAttended,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'Event Attendance Summary'
+        },
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

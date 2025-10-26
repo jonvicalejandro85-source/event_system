@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ action }} Event</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <!-- Event Name -->
+    <div class="mb-3">
+      {{ form.name.label(class="form-label") }}
+      {{ form.name(class="form-control") }}
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3">
+      {{ form.description.label(class="form-label") }}
+      {{ form.description(class="form-control", rows="3") }}
+    </div>
+
+    <!-- Venue -->
+    <div class="mb-3">
+      {{ form.venue.label(class="form-label") }}
+      {{ form.venue(class="form-control") }}
+    </div>
+
+    <!-- Start Date & Time -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        {{ form.start_date.label(class="form-label") }}
+        {{ form.start_date(class="form-control", id="startDate") }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.start_time.label(class="form-label") }}
+        {{ form.start_time(class="form-control", id="startTime") }}
+      </div>
+    </div>
+
+    <!-- End Date & Time -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        {{ form.end_date.label(class="form-label") }}
+        {{ form.end_date(class="form-control", id="endDate") }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.end_time.label(class="form-label") }}
+        {{ form.end_time(class="form-control", id="endTime") }}
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="mb-3">
+      {{ form.submit(class="btn btn-primary") }}
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<!-- Auto-fill End Date/Time -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const startDateInput = document.getElementById("startDate");
+  const startTimeInput = document.getElementById("startTime");
+  const endDateInput = document.getElementById("endDate");
+  const endTimeInput = document.getElementById("endTime");
+
+  // Default: today’s date & current time
+  const now = new Date();
+  const formattedDate = now.toISOString().split("T")[0];
+  const formattedTime = now.toTimeString().slice(0,5);
+
+  if (!startDateInput.value) startDateInput.value = formattedDate;
+  if (!startTimeInput.value) startTimeInput.value = formattedTime;
+  if (!endDateInput.value) endDateInput.value = formattedDate;
+
+  // Default end time = +1 hour
+  if (!endTimeInput.value) {
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+    endTimeInput.value = oneHourLater.toTimeString().slice(0,5);
+  }
+
+  // Auto-adjust end date/time when start changes
+  startTimeInput.addEventListener("change", function() {
+    const start = new Date(`${startDateInput.value}T${startTimeInput.value}`);
+    const oneHourLater = new Date(start.getTime() + 60 * 60 * 1000);
+    endDateInput.value = oneHourLater.toISOString().split("T")[0];
+    endTimeInput.value = oneHourLater.toTimeString().slice(0,5);
+  });
+});
+</script>
+{% endblock %}
