@@ -9,7 +9,6 @@ from io import BytesIO
 from datetime import datetime
 import csv
 from flask import send_file
-
 import os
 
 def create_app():

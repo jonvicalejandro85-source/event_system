@@ -1,12 +1,21 @@
 import os
 from dotenv import load_dotenv
-
+import fcntl
 # ✅ Load environment variables early
 load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "devkey")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///events.db")
+    # SECRET KEY (keep this for session security)
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
+
+    # DATABASE CONFIG
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///events.db')
+
+    # ✅ Fix for SQLAlchemy URI scheme (Render gives 'postgres://' but SQLAlchemy needs 'postgresql://')
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # ✅ Mail configuration
